@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { TenderCard } from "@/components/TenderCard";
 import { SearchBar } from "@/components/SearchBar";
 import { FilterBar } from "@/components/FilterBar";
+import { Cyber50Logo } from "@/components/Cyber50Logo";
 import { Tender, TenderResponse } from "@/types/tender";
-import { Shield, Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, TrendingUp, Clock, Target } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const fetchTenders = async (): Promise<TenderResponse> => {
@@ -37,23 +38,15 @@ const Index = () => {
     return matchesSearch && matchesStatus;
   }) || [];
 
+  const activeTenders = data?.results?.filter((t) => t.status.toLowerCase() !== "sealed").length || 0;
+
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen cyber-background">
       {/* Header */}
-      <header className="border-b border-border bg-card shadow-sm sticky top-0 z-50 backdrop-blur-sm bg-card/95">
+      <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50 shadow-lg">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="h-12 w-12 rounded-lg bg-gradient-primary flex items-center justify-center shadow-glow">
-              <Shield className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                CyberTender Hub
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Government Cybersecurity Procurement Portal
-              </p>
-            </div>
+          <div className="mb-6">
+            <Cyber50Logo />
           </div>
 
           <div className="flex flex-col md:flex-row gap-4">
@@ -69,18 +62,39 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Stats Bar */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-card rounded-lg p-6 shadow-md border border-border">
-            <div className="text-2xl font-bold text-primary">{data?.results?.length || 0}</div>
+          <div className="bg-card/60 backdrop-blur-sm rounded-xl p-6 border border-border/50 hover:shadow-lg transition-all group">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <Target className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              {data?.results?.length || 0}
+            </div>
             <div className="text-sm text-muted-foreground">Total Tenders</div>
           </div>
-          <div className="bg-card rounded-lg p-6 shadow-md border border-border">
-            <div className="text-2xl font-bold text-success">
-              {data?.results?.filter((t) => t.status.toLowerCase() !== "sealed").length || 0}
+
+          <div className="bg-card/60 backdrop-blur-sm rounded-xl p-6 border border-border/50 hover:shadow-lg transition-all group">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-2 rounded-lg bg-success/10 group-hover:bg-success/20 transition-colors">
+                <TrendingUp className="h-5 w-5 text-success" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-success">
+              {activeTenders}
             </div>
             <div className="text-sm text-muted-foreground">Active Opportunities</div>
           </div>
-          <div className="bg-card rounded-lg p-6 shadow-md border border-border">
-            <div className="text-2xl font-bold text-accent">{filteredTenders.length}</div>
+
+          <div className="bg-card/60 backdrop-blur-sm rounded-xl p-6 border border-border/50 hover:shadow-lg transition-all group">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-2 rounded-lg bg-accent/10 group-hover:bg-accent/20 transition-colors">
+                <Clock className="h-5 w-5 text-accent" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold bg-gradient-accent bg-clip-text text-transparent">
+              {filteredTenders.length}
+            </div>
             <div className="text-sm text-muted-foreground">Matching Filters</div>
           </div>
         </div>
@@ -89,15 +103,20 @@ const Index = () => {
         {isLoading && (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-              <p className="text-muted-foreground">Loading tenders...</p>
+              <div className="relative">
+                <div className="absolute inset-0 blur-2xl opacity-50">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+                </div>
+                <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4 relative" />
+              </div>
+              <p className="text-muted-foreground">Scanning government portals...</p>
             </div>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <Alert variant="destructive" className="mb-8">
+          <Alert variant="destructive" className="mb-8 bg-destructive/10 border-destructive/50">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Failed to load tenders. Please check your connection and try again.
@@ -116,8 +135,8 @@ const Index = () => {
               </div>
             ) : (
               <div className="text-center py-20">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
-                  <Shield className="h-8 w-8 text-muted-foreground" />
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted/50 mb-4 glow-primary">
+                  <Target className="h-10 w-10 text-muted-foreground" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">No tenders found</h3>
                 <p className="text-muted-foreground">
@@ -130,9 +149,14 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card mt-20">
+      <footer className="border-t border-border/50 bg-card/30 backdrop-blur-sm mt-20">
         <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
-          <p>CyberTender Hub - Aggregating government cybersecurity procurement opportunities</p>
+          <p>
+            <span className="font-semibold bg-gradient-primary bg-clip-text text-transparent">
+              CYBER50 DEFENSE
+            </span>{" "}
+            Tender Intelligence Platform - Your Guardian in Government Procurement
+          </p>
         </div>
       </footer>
     </div>

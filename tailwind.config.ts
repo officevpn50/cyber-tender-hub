@@ -68,15 +68,16 @@ export default {
         },
       },
       backgroundImage: {
-        'gradient-primary': 'var(--gradient-primary)',
-        'gradient-accent': 'var(--gradient-accent)',
-        'gradient-subtle': 'var(--gradient-subtle)',
+        'gradient-primary': 'linear-gradient(135deg, hsl(217 91% 60%), hsl(200 100% 70%))',
+        'gradient-accent': 'linear-gradient(135deg, hsl(170 100% 45%), hsl(260 80% 60%))',
+        'gradient-hero': 'linear-gradient(180deg, hsl(220 40% 8%) 0%, hsl(220 35% 12%) 100%)',
       },
       boxShadow: {
-        'sm': 'var(--shadow-sm)',
-        'md': 'var(--shadow-md)',
-        'lg': 'var(--shadow-lg)',
-        'glow': 'var(--shadow-glow)',
+        'sm': '0 2px 8px hsl(0 0% 0% / 0.3)',
+        'md': '0 4px 16px hsl(0 0% 0% / 0.4)',
+        'lg': '0 8px 32px hsl(217 91% 60% / 0.2)',
+        'glow': '0 0 40px hsl(200 100% 70% / 0.3)',
+        'glow-accent': '0 0 30px hsl(170 100% 45% / 0.4)',
       },
       borderRadius: {
         lg: "var(--radius)",
