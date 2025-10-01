@@ -7,42 +7,16 @@ import { Cyber50Logo } from "@/components/Cyber50Logo";
 import { Tender, TenderResponse } from "@/types/tender";
 import { Loader2, AlertCircle, TrendingUp, Clock, Target } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 
 const fetchTenders = async (): Promise<TenderResponse> => {
-  const response = await fetch("http://51.112.219.218:8000/scrape", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      keywords: [
-        "Cybersecurity", "Security", "Information Security", "Network Security", "Data Protection",
-        "Cyber Threat", "Incident Response", "Penetration Testing", "Vulnerability Assessment", "RFP",
-        "IT Security", "Endpoint Security", "Firewall", "Intrusion Detection", "Intrusion Prevention",
-        "SIEM", "SOC", "Malware Analysis", "Threat Intelligence", "Phishing", "Ransomware",
-        "Cloud Security", "Application Security", "Web Security", "Zero Trust", "Identity Management",
-        "Access Control", "Encryption", "Data Loss Prevention", "Security Audit", "ISO 27001",
-        "NIST", "CIS Controls", "Cyber Defense", "Red Team", "Blue Team", "Security Operations",
-        "Vulnerability Management", "Security Policy", "Security Governance", "Cyber Risk",
-        "Cyber Resilience", "Security Monitoring", "Threat Hunting", "Digital Forensics",
-        "SOC-as-a-Service", "MDR", "Cloud Compliance", "Security Awareness Training",
-        "Endpoint Detection", "Application Firewall", "SIEM Integration", "Patch Management",
-        "أمن سيبراني", "الأمن المعلوماتي", "حماية البيانات", "الهجمات السيبرانية",
-        "الاستجابة للحوادث", "اختبار الاختراق", "تقييم الثغرات", "حماية الشبكات",
-        "سياسة الأمان", "حوكمة أمن المعلومات", "تدقيق أمني", "الامتثال الأمني",
-        "الوعي الأمني", "تشخيص البرمجيات الخبيثة", "الهندسة العكسية", "تحليل التهديدات",
-        "إدارة الهوية", "التحكم بالوصول", "تشفير البيانات", "خدمات الأمن السحابي",
-        "إدارة المخاطر السيبرانية", "الاختبارات الأمنية", "الحماية من الفيروسات", "الجرائم الإلكترونية"
-      ],
-      max_results: 50,
-      strict_mode: true,
-      loose_phrases: false
-    })
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch tenders");
+  const { data, error } = await supabase.functions.invoke('fetch-tenders');
+  
+  if (error) {
+    throw new Error(error.message || "Failed to fetch tenders");
   }
-  return response.json();
+  
+  return data;
 };
 
 const Index = () => {
