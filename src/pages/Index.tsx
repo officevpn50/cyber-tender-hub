@@ -10,13 +10,35 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 
 const fetchTenders = async (): Promise<TenderResponse> => {
-  const { data, error } = await supabase.functions.invoke('fetch-tenders');
+  // For production, use your EC2 proxy endpoint
+  // For development with Lovable Cloud, use supabase function
+  const isProduction = window.location.hostname !== 'localhost' && 
+                       !window.location.hostname.includes('lovable.app');
   
-  if (error) {
-    throw new Error(error.message || "Failed to fetch tenders");
+  if (isProduction) {
+    // EC2 proxy endpoint (adjust URL as needed)
+    const response = await fetch('/api/tenders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to fetch tenders");
+    }
+    
+    return response.json();
+  } else {
+    // Lovable Cloud backend
+    const { data, error } = await supabase.functions.invoke('fetch-tenders');
+    
+    if (error) {
+      throw new Error(error.message || "Failed to fetch tenders");
+    }
+    
+    return data;
   }
-  
-  return data;
 };
 
 const Index = () => {
