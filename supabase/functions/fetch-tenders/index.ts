@@ -5,6 +5,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Simple in-memory cache
+let cachedData: any = null;
+let cacheTimestamp = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -12,7 +17,20 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Fetching tenders from external API...');
+    // Check cache first
+    const now = Date.now();
+    if (cachedData && (now - cacheTimestamp) < CACHE_DURATION) {
+      console.log('Returning cached data (age:', Math.floor((now - cacheTimestamp) / 1000), 'seconds)');
+      return new Response(JSON.stringify(cachedData), {
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'X-Cache': 'HIT'
+        },
+      });
+    }
+
+    console.log('Cache miss - Fetching tenders from external API...');
     
     const response = await fetch("http://51.112.219.218:8000/scrape", {
       method: "POST",
@@ -46,15 +64,38 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      console.error('API request failed:', response.status, response.statusText);
-      throw new Error(`API request failed: ${response.status}`);
+      const errorMsg = `API request failed: ${response.status} ${response.statusText}`;
+      console.error(errorMsg);
+      
+      // If rate limited and we have cached data, return it even if stale
+      if (response.status === 429 && cachedData) {
+        console.log('Rate limited but returning stale cache');
+        return new Response(JSON.stringify(cachedData), {
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'X-Cache': 'STALE',
+            'X-Rate-Limited': 'true'
+          },
+        });
+      }
+      
+      throw new Error(errorMsg);
     }
 
     const data = await response.json();
     console.log(`Successfully fetched ${data.results?.length || 0} tenders`);
+    
+    // Update cache
+    cachedData = data;
+    cacheTimestamp = Date.now();
 
     return new Response(JSON.stringify(data), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'application/json',
+        'X-Cache': 'MISS'
+      },
     });
   } catch (error) {
     console.error('Error fetching tenders:', error);

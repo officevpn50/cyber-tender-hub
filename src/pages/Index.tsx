@@ -26,7 +26,8 @@ const Index = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["tenders"],
     queryFn: fetchTenders,
-    refetchInterval: 60000, // Refresh every minute
+    refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes to avoid rate limits
+    staleTime: 2 * 60 * 1000, // Consider data fresh for 2 minutes
   });
 
   const filteredTenders = data?.results?.filter((tender: Tender) => {
@@ -122,7 +123,9 @@ const Index = () => {
           <Alert variant="destructive" className="mb-8 bg-destructive/10 border-destructive/50">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Failed to load tenders. Please check your connection and try again.
+              {error instanceof Error && error.message.includes('429') 
+                ? 'The tender API is rate limited. Showing cached data or try again in a few minutes.'
+                : 'Failed to load tenders. Please check your connection and try again.'}
             </AlertDescription>
           </Alert>
         )}
